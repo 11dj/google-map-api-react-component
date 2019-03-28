@@ -1,38 +1,36 @@
 import React, { Component } from 'react';
 
 class PlaceDetail extends Component {
-  componentDidMount() {
-    this.initMap()
+  constructor () {
+    super()
+    this.state = {
+
+    }
   }
 
-  initMap () {
-    let map = new window.google.maps.Map(document.getElementById('map'), {
-      center: {lat: -33.866, lng: 151.196},
-      zoom: 15
-    });
+  componentDidMount() {
+    this.initMap('siam paragon')
+  }
 
+  initMap (placeName) {
+    let map = new window.google.maps.Map('', {});
     const service = new window.google.maps.places.PlacesService(map)
-
     let request = {
-      // placeId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-      query: 'Siam paragon',
-      fields: ['name', 'formatted_address', 'place_id', 'geometry', 'opening_hours', 'rating'],
-      locationBias: {lat: 37.402105, lng: -122.081974}
+      query: placeName,
+      fields: ['place_id']
     };
 
     service.findPlaceFromQuery(request, function(place, status) {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        console.log('place', place)
-        console.log('opening_hours', place[0].opening_hours)
-        console.log('place.rating', place[0].rating)
-      }
+      console.log('placeId', place[0].place_id)
+      service.getDetails({
+        placeId: place[0].place_id,
+        fields: ['name', 'rating', 'opening_hours']
+      }, function callback(placeD, statusD) {
+        console.log('Detail rating', placeD.rating)
+        console.log('Detail opening_now', placeD.opening_hours.open_now)
+        console.log('Detail opening_hours', placeD.opening_hours)
+      })
     });
-    // service.getDetails(request, function(place, status) {
-    //   if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-    //     console.log('opening_hours', place.opening_hours)
-    //     console.log('place.rating', place.rating)
-    //   }
-    // });
   }
 
   render() {
