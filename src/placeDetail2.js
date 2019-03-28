@@ -6,19 +6,30 @@ export async function getDetail (placeName) {
     query: placeName,
     fields: ['place_id']
   };
-  await service.findPlaceFromQuery(request, async (place, status) => {
-    console.log('placeId', place[0].place_id)
-    await service.getDetails({
-      placeId: place[0].place_id,
-      fields: ['name', 'rating', 'opening_hours', 'address_component']
-    }, async (placeD, statusD) => {
-      output = await placeD
-      // await console.log('Detail', placeD)
-      // await console.log('Detail rating', placeD.rating)
-      // await console.log('Detail opening_now', placeD.opening_hours.open_now)
-      // await console.log('Detail opening_hours', placeD.opening_hours)
-      // return placeD
+
+  const placePromise = await new Promise((resolve, reject) => {
+    service.findPlaceFromQuery(request, (place, status) => {
+      if (status === 'OK') {
+        resolve(place)
+      } else {
+        reject(Error(status))
+      }
     })
-  });
+  })
+
+  const placeDetailPromise = await new Promise((resolve, reject) => {
+    service.getDetails({
+      placeId: placePromise[0].place_id,
+      fields: ['name', 'rating', 'opening_hours', 'address_component']
+    }, (placeDetail, statusDetail) => {
+      if (statusDetail === 'OK') {
+        resolve(placeDetail)
+      } else {
+        reject(Error(statusDetail))
+      }
+    })
+  })
+
+  output = placeDetailPromise
   return output
 }
